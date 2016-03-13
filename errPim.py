@@ -33,7 +33,13 @@ class ErrPim(BotPlugin):
     	def tran(self, msg, args):
 		url = 'http://www.zaragoza.es/api/recurso/urbanismo-infraestructuras/tranvia?rf=html&results_only=false&srsname=utm30n'
 		cadTemplate = 'Faltan: %d minutos (Destino %s)'
-		parada = "CAMPUS RIO EBRO"
+
+		if args:
+			parada = args.upper()
+		else:
+			parada = "CAMPUS RIO EBRO"
+
+		yield "Parada: " + parada + "."
 
 		request = urllib2.Request(url)
 		request.add_header("Accept",  "application/json")
@@ -43,8 +49,8 @@ class ErrPim(BotPlugin):
 
 		if resProc["totalCount"] > 0:
 			for i in range(int(resProc["totalCount"])):
-				if (resProc["result"][i]["title"] == parada):
-					yield "Parada: "+ parada
+				if (resProc["result"][i]["title"].find(parada) >= 0):
+					yield "Parada: " + resProc["result"][i]["title"] + " (" + parada + ")"
 					for j in range(len(resProc["result"][i]["destinos"])):
 						cad = cadTemplate % (resProc["result"][i]["destinos"][j]["minutos"], resProc["result"][i]["destinos"][j]["destino"])
 						yield cad
