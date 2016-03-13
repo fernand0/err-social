@@ -39,8 +39,6 @@ class ErrPim(BotPlugin):
 		else:
 			parada = "CAMPUS RIO EBRO"
 
-		yield "Parada: " + parada + "."
-
 		request = urllib2.Request(url)
 		request.add_header("Accept",  "application/json")
 
