@@ -19,7 +19,33 @@ class ErrPim(BotPlugin):
     """An Err plugin skeleton"""
     min_err_version = '1.6.0' # Optional, but recommended
     max_err_version = '4.0.4' # Optional, but recommended
-    
+
+    def ptw(self, msg, args):
+        config = ConfigParser.ConfigParser()
+        config.read([os.path.expanduser('~/.rssTwitter')])
+
+        CONSUMER_KEY = config.get("appKeys", "CONSUMER_KEY")
+        CONSUMER_SECRET = config.get("appKeys", "CONSUMER_SECRET")
+        TOKEN_KEY = config.get('fernand0', "TOKEN_KEY")
+        TOKEN_SECRET = config.get('fernand0', "TOKEN_SECRET")
+
+        authentication  = OAuth(TOKEN_KEY, 
+                                   TOKEN_SECRET, 
+                                   CONSUMER_KEY, 
+                                   CONSUMER_SECRET)
+        t = Twitter(auth=authentication)
+        reply = t.statuses.update(status = args)
+        return reply["created_at"]
+
+    def pfb(self, msg, args):
+         config = ConfigParser.ConfigParser()
+         config.read([os.path.expanduser('~/.rssFacebook')])
+
+         oauth_access_token= config.get("Facebook", "oauth_access_token")
+
+         graph = facebook.GraphAPI(oauth_access_token)
+         return graph.put_object("me", "feed", message = args)
+   
     # Passing split_args_with=None will cause arguments to be split on any kind
     # of whitespace, just like Python's split() does
     #@botcmd(split_args_with=None)
@@ -83,28 +109,17 @@ class ErrPim(BotPlugin):
 
     @botcmd
     def tw(self, msg, args):
-        config = ConfigParser.ConfigParser()
-        config.read([os.path.expanduser('~/.rssTwitter')])
-
-        CONSUMER_KEY = config.get("appKeys", "CONSUMER_KEY")
-        CONSUMER_SECRET = config.get("appKeys", "CONSUMER_SECRET")
-        TOKEN_KEY = config.get('fernand0', "TOKEN_KEY")
-        TOKEN_SECRET = config.get('fernand0', "TOKEN_SECRET")
-
-        authentication  = OAuth(TOKEN_KEY, 
-                                   TOKEN_SECRET, 
-                                   CONSUMER_KEY, 
-                                   CONSUMER_SECRET)
-        t = Twitter(auth=authentication)
-        reply = t.statuses.update(status = args)
-        yield reply["created_at"]
+         yield self.ptw(msg, args)
 
     @botcmd
     def fb(self, msg, args):	
-         config = ConfigParser.ConfigParser()
-         config.read([os.path.expanduser('~/.rssFacebook')])
+         yield self.pfb(msg, args)
 
-         oauth_access_token= config.get("Facebook", "oauth_access_token")
+    @botcmd
+    def ptf(self, msg, args):
+         yield "Twitter..."
+         yield self.ptw(msg, args)
+         yield "Facebook..."
+         yield self.pfb(msg, args)
 
-         graph = facebook.GraphAPI(oauth_access_token)
-         yield graph.put_object("me", "feed", message = args)
+
