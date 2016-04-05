@@ -118,7 +118,7 @@ class ErrPim(BotPlugin):
                   txt=''
                   for dato in record.find_all('td'):
                       txt=txt +' ' + dato.get_text()
-                      yield txt
+                  yield txt
                   found = found + 1
          if (found==0):
             yield name+" not found."
