@@ -45,25 +45,25 @@ class ErrPim(BotPlugin):
 
          graph = facebook.GraphAPI(oauth_access_token)
          return graph.put_object("me", "feed", message = args)
-   
 
-    @botcmd
-    def buscar(self, msg, args):
-
+    def search(self, msg, args):
          arg='/usr/bin/sudo /usr/bin/mairix %s'%args
          p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
-         yield "Indexando ..." 
          data = p.communicate()
-         yield data[0]
+         return data[0]
+
+    @botcmd
+    def sm(self, msg, args):
+         yield "Indexando ..." 
+         yield self.search(msg, args)
 
 # sudo ls -l /var/vmail/ra-amon.lan/f.tricas/Maildir/.Search/cur 
 #lrwxrwxrwx 1 root root 120 May 11 17:44 123456789.119299.mairix:2,S -> /var/vmail/ra-amon.lan/f.tricas/Maildir/Maildir/.Research.weblogs/cur/1427325746.M403724P15101.ra-amon,S=9615,W=9766:2,S
 #lrwxrwxrwx 1 root root 122 May 11 17:44 123456789.119300.mairix:2,S -> /var/vmail/ra-amon.lan/f.tricas/Maildir/Maildir/.Research.weblogs/cur/1437524577.M889587P11219.ra-amon,S=13980,W=14185:2,S
 
     @botcmd
-    def bf(self, msg, args):
-
-         self.buscar(msg, args)
+    def sf(self, msg, args):
+         yield self.search(msg, args)
 
          path = '/var/vmail/ra-amon.lan/f.tricas/Maildir'
          arg='/usr/bin/sudo /bin/ls -l %s/.Search/cur' % path
