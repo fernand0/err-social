@@ -46,9 +46,7 @@ class ErrPim(BotPlugin):
          graph = facebook.GraphAPI(oauth_access_token)
          return graph.put_object("me", "feed", message = args)
    
-    # Passing split_args_with=None will cause arguments to be split on any kind
-    # of whitespace, just like Python's split() does
-    #@botcmd(split_args_with=None)
+
     @botcmd
     def buscar(self, msg, args):
 
@@ -57,6 +55,31 @@ class ErrPim(BotPlugin):
          yield "Indexando ..." 
          data = p.communicate()
          yield data[0]
+
+# sudo ls -l /var/vmail/ra-amon.lan/f.tricas/Maildir/.Search/cur 
+#lrwxrwxrwx 1 root root 120 May 11 17:44 123456789.119299.mairix:2,S -> /var/vmail/ra-amon.lan/f.tricas/Maildir/Maildir/.Research.weblogs/cur/1427325746.M403724P15101.ra-amon,S=9615,W=9766:2,S
+#lrwxrwxrwx 1 root root 122 May 11 17:44 123456789.119300.mairix:2,S -> /var/vmail/ra-amon.lan/f.tricas/Maildir/Maildir/.Research.weblogs/cur/1437524577.M889587P11219.ra-amon,S=13980,W=14185:2,S
+
+    @botcmd
+    def bf(self, msg, args):
+
+         self.buscar(msg, args)
+
+         path = '/var/vmail/ra-amon.lan/f.tricas/Maildir'
+         arg='/usr/bin/sudo /bin/ls -l %s/.Search/cur' % path
+         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
+         data = p.communicate()
+         
+         folders = []
+         
+         for i in data[0].split('\n')[1:]:
+         	j = i[i.find('/.')+2:]
+         	folder = j[:j.find('/')]
+         	if folder and 'mairix' not in folder and not folder in folders: 
+         		folders.append(folder)
+
+         yield folders
+
 
     @botcmd
     def tran(self, msg, args):
