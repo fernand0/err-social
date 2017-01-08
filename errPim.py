@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 import io #import StringIO
 from twitter import *
 import facebook
+from linkedin import linkedin
 
 
 class ErrPim(BotPlugin):
@@ -42,8 +43,6 @@ class ErrPim(BotPlugin):
             else:
                 return None
 
-
-
     def ptw(self, msg, args):
         config = configparser.ConfigParser()
         config.read([os.path.expanduser('~/.rssTwitter')])
@@ -62,13 +61,39 @@ class ErrPim(BotPlugin):
         return "OK" #reply["created_at"]
 
     def pfb(self, msg, args):
-         config = configparser.ConfigParser()
-         config.read([os.path.expanduser('~/.rssFacebook')])
+        config = configparser.ConfigParser()
+        config.read([os.path.expanduser('~/.rssFacebook')])
 
-         oauth_access_token= config.get("Facebook", "oauth_access_token")
+        oauth_access_token= config.get("Facebook", "oauth_access_token")
 
-         graph = facebook.GraphAPI(oauth_access_token)
-         return "Ok" # graph.put_object("me", "feed", message = args)
+        graph = facebook.GraphAPI(oauth_access_token)
+        graph.put_object("me", "feed", message = args)
+
+        return "Ok" 
+
+    def pln(self, msg, args):
+        config = configparser.ConfigParser()
+        config.read([os.path.expanduser('~/.rssLinkedin')])
+
+        CONSUMER_KEY = config.get("Linkedin", "CONSUMER_KEY")
+        CONSUMER_SECRET = config.get("Linkedin", "CONSUMER_SECRET")
+        USER_TOKEN = config.get("Linkedin", "USER_TOKEN")
+        USER_SECRET = config.get("Linkedin", "USER_SECRET")
+        RETURN_URL = config.get("Linkedin", "RETURN_URL"),
+
+        authentication = linkedin.LinkedInDeveloperAuthentication(
+                    CONSUMER_KEY,
+                    CONSUMER_SECRET,
+                    USER_TOKEN,
+                    USER_SECRET,
+                    RETURN_URL,
+                    linkedin.PERMISSIONS.enums.values())
+
+        application = linkedin.LinkedInApplication(authentication)
+
+        application.submit_share(comment=args)
+        return "Ok" 
+
 
     def search(self, msg, args):
          arg='/usr/bin/sudo /usr/bin/mairix %s'%args
@@ -176,10 +201,22 @@ class ErrPim(BotPlugin):
          yield self.pfb(msg, args)
 
     @botcmd
+    def ln(self, msg, args):    
+         yield self.pln(msg, args)
+
+    @botcmd
     def ptf(self, msg, args):
          yield "Twitter..."
          yield self.ptw(msg, args)
          yield "Facebook..."
          yield self.pfb(msg, args)
 
+    @botcmd
+    def ptfl(self, msg, args):
+         yield "Twitter..."
+         yield self.ptw(msg, args)
+         yield "Facebook..."
+         yield self.pfb(msg, args)
+         yield "LinkedIn..."
+         yield self.pln(msg, args)
 
