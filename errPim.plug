@@ -6,4 +6,4 @@ Module = errPim
 Description = An Err plugin to have a personal information manager (PIM)
 
 [Python]
-Version = 2+
+Version = 3
