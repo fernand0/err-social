@@ -18,6 +18,9 @@ from twitter import *
 import facebook
 from linkedin import linkedin
 
+def end(msg=""):
+    return("END"+msg)
+
 
 class ErrPim(BotPlugin):
     """An Err plugin skeleton"""
@@ -96,7 +99,7 @@ class ErrPim(BotPlugin):
 
 
     def search(self, msg, args):
-        arg='/usr/bin/sudo /usr/bin/mairix %s'%args
+        arg='/usr/bin/sudo /usr/bin/mairix "%s"'%args
         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
         data = p.communicate()
         return data[0]
@@ -105,16 +108,18 @@ class ErrPim(BotPlugin):
     def sm(self, msg, args):
         yield "Indexando ..." 
         yield self.search(msg, args)
+        yield end()
 
     @botcmd
     def sf(self, msg, args):
+        yield "Searching %s"%args 
         yield self.search(msg, args)
 
         path = self._check_config('pathMail')
 	# We are using mairix, which leaves a link to the messages in the
 	# Search folder. Now we just look for the folders where the actual
 	# messages are located.
-	arg='/usr/bin/sudo /bin/ls -l %s/.Search/cur' % path
+        arg='/usr/bin/sudo /bin/ls -l %s/.Search/cur' % path
         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
         data = p.communicate()
         
@@ -128,6 +133,7 @@ class ErrPim(BotPlugin):
                 folders.append(folder)
 
         yield folders
+        yield end()
 
 
     @botcmd
@@ -171,6 +177,7 @@ class ErrPim(BotPlugin):
                      yield "No hay trenes"
         else:
            yield "Sin respuesta"
+        yield end()
 
 
     @botcmd
@@ -194,18 +201,22 @@ class ErrPim(BotPlugin):
                  found = found + 1
         if (found==0):
            yield name+" not found."
+        yield end()
 
     @botcmd
     def tw(self, msg, args):
         yield self.ptw(msg, args)
+        yield end()
 
     @botcmd
     def fb(self, msg, args):    
         yield self.pfb(msg, args)
+        yield end()
 
     @botcmd
     def ln(self, msg, args):    
         yield self.pln(msg, args)
+        yield end()
 
     @botcmd
     def ptf(self, msg, args):
@@ -213,6 +224,7 @@ class ErrPim(BotPlugin):
         yield self.ptw(msg, args)
         yield "Facebook..."
         yield self.pfb(msg, args)
+        yield end()
 
     @botcmd
     def ptfl(self, msg, args):
@@ -222,4 +234,5 @@ class ErrPim(BotPlugin):
         yield self.pfb(msg, args)
         yield "LinkedIn..."
         yield self.pln(msg, args)
+        yield end()
 
