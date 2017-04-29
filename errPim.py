@@ -21,7 +21,6 @@ from linkedin import linkedin
 def end(msg=""):
     return("END"+msg)
 
-
 class ErrPim(BotPlugin):
     """An Err plugin skeleton"""
     min_err_version = '1.6.0' # Optional, but recommended
@@ -150,31 +149,29 @@ class ErrPim(BotPlugin):
         headers = {"Accept":  "application/json"}
         response = requests.get(url, headers = headers)
         resProc = response.json() 
-        tit = 0
         if resProc["totalCount"] > 0:
+           tit = 0
            for i in range(int(resProc["totalCount"])):
                if (resProc["result"][i]["title"].find(parada) >= 0):
                   if (tit == 0):
                       yield "Parada: " + resProc["result"][i]["title"] + " (" + parada + ")"
-                      tit = 1
-                      timeDest = {}
-                      if "destinos" in resProc["result"][i]:
-                          for j in range(len(resProc["result"][i]["destinos"])):
-                             if (resProc["result"][i]["destinos"][j]["destino"]) in timeDest:
-                                timeDest[resProc["result"][i]["destinos"][j]["destino"]].append(resProc["result"][i]["destinos"][j]["minutos"])
-                             else:
-                                timeDest[resProc["result"][i]["destinos"][j]["destino"]] = []
-                                timeDest[resProc["result"][i]["destinos"][j]["destino"]].append(resProc["result"][i]["destinos"][j]["minutos"])
-                          for j in timeDest.keys():
-                              time1 = timeDest[j][0]
-                              if (len(timeDest[j]) > 1):
-                                   time2 = timeDest[j][1]
-                                   cad = cadTemplate % (time1, time2, j)
-                              else:
-                                   cad = cadTemplate % (time1, time1, j)
-                          yield cad
-                  else:
-                     yield "No hay trenes"
+                  tit = 1
+                  timeDest = {}
+                  if "destinos" in resProc["result"][i]:
+                      for j in range(len(resProc["result"][i]["destinos"])):
+                         if (resProc["result"][i]["destinos"][j]["destino"]) in timeDest:
+                            timeDest[resProc["result"][i]["destinos"][j]["destino"]].append(resProc["result"][i]["destinos"][j]["minutos"])
+                         else:
+                            timeDest[resProc["result"][i]["destinos"][j]["destino"]] = []
+                            timeDest[resProc["result"][i]["destinos"][j]["destino"]].append(resProc["result"][i]["destinos"][j]["minutos"])
+                      for j in timeDest.keys():
+                          time1 = timeDest[j][0]
+                          if (len(timeDest[j]) > 1):
+                               time2 = timeDest[j][1]
+                               cad = cadTemplate % (time1, time2, j)
+                          else:
+                               cad = cadTemplate % (time1, time1, j)
+                      yield cad
         else:
            yield "Sin respuesta"
         yield end()
