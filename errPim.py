@@ -109,10 +109,13 @@ class ErrPim(BotPlugin):
         yield self.search(msg, args)
         yield end()
 
-    @botcmd
+    @botcmd(split_args_with=None)
     def sf(self, msg, args):
-        yield "Searching %s"%args 
-        yield self.search(msg, args)
+        yield len(args) 
+        yield "Searching %s"%args[0] 
+        yield self.search(msg, args[0])
+        if len(args) > 1:
+           yield " in %s"%args[1] 
 
         path = self._check_config('pathMail')
 	# We are using mairix, which leaves a link to the messages in the
@@ -129,7 +132,8 @@ class ErrPim(BotPlugin):
             j = i[i.find('/.')+2:]
             folder = j[:j.find('/')]
             if folder and 'mairix' not in folder and not folder in folders: 
-                folders.append(folder)
+                if (len(args) == 1) or (len(args)>1 and folder.find(args[1])>=0):
+                    folders.append(folder)
 
         yield folders
         yield end()
