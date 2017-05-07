@@ -149,6 +149,7 @@ class ErrPim(BotPlugin):
         else:
            parada = "CAMPUS RIO EBRO"
         
+        cad = 'Faltan: %s minutos (Destino %s)'
         request = urllib.request.Request(url)
         headers = {"Accept":  "application/json"}
         response = requests.get(url, headers = headers)
@@ -159,23 +160,16 @@ class ErrPim(BotPlugin):
                if (resProc["result"][i]["title"].find(parada) >= 0):
                   if (tit == 0):
                       yield "Parada: " + resProc["result"][i]["title"] + " (" + parada + ")"
-                  tit = 1
-                  timeDest = {}
-                  if "destinos" in resProc["result"][i]:
-                      for j in range(len(resProc["result"][i]["destinos"])):
-                         if (resProc["result"][i]["destinos"][j]["destino"]) in timeDest:
-                            timeDest[resProc["result"][i]["destinos"][j]["destino"]].append(resProc["result"][i]["destinos"][j]["minutos"])
-                         else:
-                            timeDest[resProc["result"][i]["destinos"][j]["destino"]] = []
-                            timeDest[resProc["result"][i]["destinos"][j]["destino"]].append(resProc["result"][i]["destinos"][j]["minutos"])
-                      for j in timeDest.keys():
-                          time1 = timeDest[j][0]
-                          if (len(timeDest[j]) > 1):
-                               time2 = timeDest[j][1]
-                               cad = cadTemplate % (time1, time2, j)
-                          else:
-                               cad = cadTemplate % (time1, time1, j)
-                      yield cad
+                      tit = 1
+                  dest = {}
+                  for j in range(len(resProc["result"][i]["destinos"])):
+                      myDest = resProc["result"][i]["destinos"][j]["destino"] 
+                      if myDest in dest:
+                          dest[myDest].append(resProc["result"][i]["destinos"][j]["minutos"])
+                      else:
+                          dest[myDest] = [resProc["result"][i]["destinos"][j]["minutos"]]
+                  for j in dest.keys():
+                      yield cad % (dest[j], j)
         else:
            yield "Sin respuesta"
         yield end()
@@ -192,7 +186,10 @@ class ErrPim(BotPlugin):
         
         name=args
         found=0
-        yield "Buscando... "+name
+        self.send(msg.frm,
+                  'Buscando... "{0}" '.format(name),
+                  in_reply_to=msg,
+                  groupchat_nick_reply=True)
         for record in soup.find_all('tr'):
             if  re.match(".*"+name+".*", record.get_text(),re.IGNORECASE):
                  txt=''
@@ -201,8 +198,14 @@ class ErrPim(BotPlugin):
                  yield txt
                  found = found + 1
         if (found==0):
-           yield name+" not found."
-        yield end()
+            self.send(msg.frm,
+                      '"{0}" not found.'.format(name),
+                      in_reply_to=msg,
+                      groupchat_nick_reply=True)
+        self.send(msg.frm,
+                  '{0}'.format(end()),
+                  in_reply_to=msg,
+                  groupchat_nick_reply=True)
 
     @botcmd
     def tw(self, msg, args):
