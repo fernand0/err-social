@@ -17,6 +17,7 @@ import io #import StringIO
 from twitter import *
 import facebook
 from linkedin import linkedin
+import dateparser
 
 def end(msg=""):
     return("END"+msg)
@@ -30,6 +31,7 @@ class ErrPim(BotPlugin):
         """ configuration entries """
         config = {
             'pathMail': '',
+            'listBlogs': '',
         }
         return config
 
@@ -44,6 +46,38 @@ class ErrPim(BotPlugin):
                 return self.config[option]
             else:
                 return None
+    @botcmd
+    def addBlog(self, msg, args):
+        self.config['listBlogs'].append(args)
+        self.configure(self.config)
+        yield(self.config)
+
+    def is_date(self, string):
+        if dateparser.parse(string):
+            return True
+        else:
+            return False
+
+    def selectLastLink(self, msg, args):
+        url = self._check_config('listBlogs')
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text)
+        links = soup.find_all('a')
+        listLinks = []
+        for link in links:
+            theUrl = link.get('href')
+            theText = link.text
+            if not self.is_date(theText):
+                # some templates in Wordpress include the link with the date.
+                if theUrl:
+                    if (theUrl.find(url) >= 0 and (theUrl != url)):
+                        if theUrl.count('/') > url.count('/') + 1:
+                            # This is to avoid /about /rss and others...
+                            listLinks.append((theUrl,theText))
+                    if theUrl and ((theUrl[0] == '/') and (theUrl != '/')):
+                        if theUrl.count('/') > 1:
+                            listLinks.append((url+theUrl,theText))
+        return(listLinks[0])
 
     def ptw(self, msg, args):
         config = configparser.ConfigParser()
@@ -68,7 +102,8 @@ class ErrPim(BotPlugin):
 
         oauth_access_token= config.get("Facebook", "oauth_access_token")
 
-        graph = facebook.GraphAPI(oauth_access_token)
+        graph = facebook.GraphAPI(oauth_access_token, version='2.7')
+
         graph.put_object("me", "feed", message = args)
 
         return "Ok" 
@@ -98,10 +133,21 @@ class ErrPim(BotPlugin):
 
 
     def search(self, msg, args):
-        arg='/usr/bin/sudo /usr/bin/mairix "%s"'%args
+        path = self._check_config('pathMail')
+        arg='/usr/bin/sudo -H -u %s /usr/bin/mairix "%s"'%(path, args)
         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
         data = p.communicate()
         return data[0]
+
+    @botcmd
+    def ll(self, msg, args):
+        yield "Looking for the link"
+        link = self.selectLastLink(msg, args)
+        yield(link)
+        yield "Twitter..."
+        self.ptw(msg, link[1]+' '+link[0])
+        yield "Facebook..."
+        self.pfb(msg, link[1]+' '+link[0])
 
     @botcmd
     def sm(self, msg, args):
@@ -111,17 +157,17 @@ class ErrPim(BotPlugin):
 
     @botcmd(split_args_with=None)
     def sf(self, msg, args):
-        yield len(args) 
         yield "Searching %s"%args[0] 
         yield self.search(msg, args[0])
         if len(args) > 1:
            yield " in %s"%args[1] 
 
         path = self._check_config('pathMail')
+        yield path
 	# We are using mairix, which leaves a link to the messages in the
 	# Search folder. Now we just look for the folders where the actual
 	# messages are located.
-        arg='/usr/bin/sudo /bin/ls -l %s/.Search/cur' % path
+        arg='/usr/bin/sudo -H -u %s /bin/ls -l /home/%s/Maildir/.Search/cur' % (path, path)
         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
         data = p.communicate()
         
