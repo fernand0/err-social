@@ -104,7 +104,13 @@ class ErrPim(BotPlugin):
 
         graph = facebook.GraphAPI(oauth_access_token, version='2.7')
 
-        graph.put_object("me", "feed", message = args)
+        posHttp = args.find('http')
+        if posHttp >=0:
+            message = args[0:posHttp-1]
+            link = args[posHttp:] 
+            graph.put_object("me", "feed", message = message, link = link)
+        else: 
+            graph.put_object("me", "feed", message = args)
 
         return "Ok" 
 
