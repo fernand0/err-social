@@ -68,7 +68,8 @@ class ErrPim(BotPlugin):
 
         oauth_access_token= config.get("Facebook", "oauth_access_token")
 
-        graph = facebook.GraphAPI(oauth_access_token)
+        graph = facebook.GraphAPI(oauth_access_token, version='2.7')
+
         graph.put_object("me", "feed", message = args)
 
         return "Ok" 
@@ -98,7 +99,8 @@ class ErrPim(BotPlugin):
 
 
     def search(self, msg, args):
-        arg='/usr/bin/sudo /usr/bin/mairix "%s"'%args
+        path = self._check_config('pathMail')
+        arg='/usr/bin/sudo -H -u %s /usr/bin/mairix "%s"'%(path, args)
         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
         data = p.communicate()
         return data[0]
@@ -111,17 +113,17 @@ class ErrPim(BotPlugin):
 
     @botcmd(split_args_with=None)
     def sf(self, msg, args):
-        yield len(args) 
         yield "Searching %s"%args[0] 
         yield self.search(msg, args[0])
         if len(args) > 1:
            yield " in %s"%args[1] 
 
         path = self._check_config('pathMail')
+        yield path
 	# We are using mairix, which leaves a link to the messages in the
 	# Search folder. Now we just look for the folders where the actual
 	# messages are located.
-        arg='/usr/bin/sudo /bin/ls -l %s/.Search/cur' % path
+        arg='/usr/bin/sudo -H -u %s /bin/ls -l /home/%s/Maildir/.Search/cur' % (path, path)
         p=subprocess.Popen(arg,shell=True,stdout=subprocess.PIPE)
         data = p.communicate()
         
