@@ -11,6 +11,7 @@ import requests
 import re
 import sys
 import json
+import pickle
 from bs4 import BeautifulSoup
 #from cStringIO import StringIO
 import io #import StringIO
@@ -147,13 +148,27 @@ class ErrPim(BotPlugin):
 
     @botcmd
     def ll(self, msg, args):
+        # The idea is to recover the list of links and to check whether the
+        # link has been posted before or not. At the end we delete one link and
+        # add the new one.
+        path = os.path.expanduser('~')
+        with open(path + '/.urls.pickle', 'rb') as f:
+            list = pickle.load(f)
         yield "Looking for the link"
         link = self.selectLastLink(msg, args)
         yield(link)
-        yield "Twitter..."
-        self.ptw(msg, link[1]+' '+link[0])
-        yield "Facebook..."
-        self.pfb(msg, link[1]+' '+link[0])
+        if (link[0] in list):
+            yield "This should not happen. This link has been posted before"
+        else:
+            yield "Twitter..."
+            self.ptw(msg, link[1]+' '+link[0])
+            yield "Facebook..."
+            self.pfb(msg, link[1]+' '+link[0])
+            list.pop()
+            list.append(link[0])
+            with open(path+'/.urls.pickle', 'wb') as f:
+                list = pickle.dump(list,f)
+            yield list
 
     @botcmd
     def sm(self, msg, args):
