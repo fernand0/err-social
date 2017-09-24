@@ -144,22 +144,22 @@ class ErrPim(BotPlugin):
         # add the new one.
         path = os.path.expanduser('~')
         with open(path + '/.urls.pickle', 'rb') as f:
-            list = pickle.load(f)
+            theList = pickle.load(f)
         yield "Looking for the link"
         link = self.selectLastLink(msg, args)
         yield(link)
-        if (link[0] in list):
+        if (link[0] in theList):
             yield "This should not happen. This link has been posted before"
         else:
             yield "Twitter..."
             self.ptw(msg, link[1]+' '+link[0])
             yield "Facebook..."
             self.pfb(msg, link[1]+' '+link[0])
-            list.pop()
-            list.append(link[0])
+            theList.pop()
+            theList.append(link[0])
             with open(path+'/.urls.pickle', 'wb') as f:
-                list = pickle.dump(list,f)
-            yield list
+                theList = pickle.dump(theList,f)
+            yield theList
 
     @botcmd
     def tw(self, msg, args):

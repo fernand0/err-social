@@ -1,9 +1,9 @@
 [Core]
-Name = ErrPim
-Module = errPim
+Name = ErrSocial
+Module = errSocial
     
 [Documentation]
-Description = An Err plugin to have a personal information manager (PIM)
+Description = An Err plugin to post on different social networks
 
 [Python]
 Version = 3
