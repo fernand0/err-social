@@ -156,7 +156,8 @@ class ErrPim(BotPlugin):
             yield "Facebook..."
             self.pfb(msg, link[1]+' '+link[0])
             theList.pop()
-            theList.append(link[0])
+            theList.append(link[0][link[0].find(':')+2:])
+            # We need to avoid http or https
             with open(path+'/.urls.pickle', 'wb') as f:
                 theList = pickle.dump(theList,f)
             yield theList
