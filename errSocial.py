@@ -69,14 +69,16 @@ class ErrPim(BotPlugin):
             theText = link.text
             if not self.is_date(theText):
                 # some templates in Wordpress include the link with the date.
-                if theUrl:
-                    if (theUrl.find(url) >= 0 and (theUrl != url)):
-                        if theUrl.count('/') > url.count('/') + 1:
-                            # This is to avoid /about /rss and others...
-                            listLinks.append((theUrl,theText))
-                    if theUrl and ((theUrl[0] == '/') and (theUrl != '/')):
-                        if theUrl.count('/') > 1:
-                            listLinks.append((url+theUrl,theText))
+                if not self.is_date(theText[:int(len(theText)/2)]
+                    # Twice
+                    if theUrl:
+                        if (theUrl.find(url) >= 0 and (theUrl != url)):
+                            if theUrl.count('/') > url.count('/') + 1:
+                                # This is to avoid /about /rss and others...
+                                listLinks.append((theUrl,theText))
+                        if theUrl and ((theUrl[0] == '/') and (theUrl != '/')):
+                            if theUrl.count('/') > 1:
+                                listLinks.append((url+theUrl,theText))
         return(listLinks[0])
 
     def ptw(self, msg, args):
