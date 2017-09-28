@@ -150,7 +150,7 @@ class ErrPim(BotPlugin):
         yield "Looking for the link"
         link = self.selectLastLink(msg, args)
         yield(link)
-        if (link[0] in theList):
+        if (link[0][link[0].find(':')+2:] in theList):
             yield "This should not happen. This link has been posted before"
         else:
             yield "Twitter..."
