@@ -69,7 +69,7 @@ class ErrPim(BotPlugin):
             theText = link.text
             if not self.is_date(theText):
                 # some templates in Wordpress include the link with the date.
-                if not self.is_date(theText[:int(len(theText)/2)]
+                if not self.is_date(theText[:int(len(theText)/2)]):
                     # Twice
                     if theUrl:
                         if (theUrl.find(url) >= 0 and (theUrl != url)):
@@ -140,7 +140,7 @@ class ErrPim(BotPlugin):
         return "Ok" 
 
     @botcmd
-    def ll(self, msg, args):
+    def pl(self, msg, args):
         # The idea is to recover the list of links and to check whether the
         # link has been posted before or not. At the end we delete one link and
         # add the new one.
@@ -163,6 +163,23 @@ class ErrPim(BotPlugin):
             with open(path+'/.urls.pickle', 'wb') as f:
                 theList = pickle.dump(theList,f)
             yield theList
+
+
+    @botcmd
+    def ll(self, msg, args):
+        # The idea is to recover the list of links and to check whether the
+        # link has been posted before or not. At the end we delete one link and
+        # add the new one.
+        path = os.path.expanduser('~')
+        with open(path + '/.urls.pickle', 'rb') as f:
+            theList = pickle.load(f)
+        yield "Looking for the link"
+        link = self.selectLastLink(msg, args)
+        yield(link)
+        if (link[0][link[0].find(':')+2:] in theList):
+            yield "This should not happen. This link has been posted before"
+        else:
+            yield "I'd post it"
 
     @botcmd
     def tw(self, msg, args):
