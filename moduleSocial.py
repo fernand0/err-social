@@ -1,1 +1,0 @@
-/home/ftricass/usr/src/scripts/moduleSocial.py
