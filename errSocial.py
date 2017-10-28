@@ -83,9 +83,11 @@ class ErrPim(BotPlugin):
         return(listLinks[0])
 
     def ptw(self, msg, args):
-        moduleSocial.publishTwitter(args, '', '', 'fernand0')
-
-        return "OK" #reply["created_at"]
+        res = moduleSocial.publishTwitter(args, '', '', 'fernand0')
+        if type(res) is str:
+            return("Something went wrong")
+        else:
+            return("Published! Text: ", res['text'], " Url: https://twitter.com/fernand0Test/status/%s"%res['id_str'])
 
     def pfb(self, msg, args):
         posHttp = args.find('http')
