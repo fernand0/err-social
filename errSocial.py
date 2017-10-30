@@ -87,7 +87,7 @@ class ErrPim(BotPlugin):
         if type(res) is str:
             return("Something went wrong")
         else:
-            return("Published! Text: ", res['text'], " Url: https://twitter.com/fernand0Test/status/%s"%res['id_str'])
+            return("Published! Text: %s Url: https://twitter.com/fernand0Test/status/%s"% (res['text'],res['id_str']))
 
     def pfb(self, msg, args):
         posHttp = args.find('http')
@@ -122,7 +122,8 @@ class ErrPim(BotPlugin):
             yield "This should not happen. This link has been posted before"
         else:
             yield "Twitter..."
-            self.ptw(msg, link[1]+' '+link[0])
+            res = self.ptw(msg, link[1]+' '+link[0])
+            yield(res)
             yield "Facebook..."
             self.pfb(msg, link[1]+' '+link[0])
             theList.pop()
