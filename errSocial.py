@@ -52,6 +52,7 @@ class ErrPim(BotPlugin):
         self.config['listBlogs'].append(args)
         self.configure(self.config)
         yield(self.config)
+        yield end()
 
     def is_date(self, string):
         if dateparser.parse(string):
@@ -149,6 +150,7 @@ class ErrPim(BotPlugin):
             yield "This should not happen. This link has been posted before"
         else:
             yield "I'd post it"
+        yield end()
 
     @botcmd
     def tw(self, msg, args):
