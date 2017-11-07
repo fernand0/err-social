@@ -85,24 +85,27 @@ class ErrPim(BotPlugin):
 
     def ptw(self, msg, args):
         res = moduleSocial.publishTwitter(args, '', '', 'fernand0')
+        # Names hardcoded
         if type(res) is str:
             return("Something went wrong")
         else:
-            return("Published! Text: %s Url: https://twitter.com/fernand0Test/status/%s"% (res['text'],res['id_str']))
+            return("Published! Text: %s Url: https://twitter.com/fernand0/status/%s"% (res['text'],res['id_str']))
+        # Names hardcoded
 
     def pfb(self, msg, args):
         posHttp = args.find('http')
         if posHttp >=0:
             message = args[0:posHttp-1]
             link = args[posHttp:] 
-            moduleSocial.publishFacebook(message, link, "", "", "me")
+            res = moduleSocial.publishFacebook(message, link, "", "", "me")
             #graph.put_object("me", "feed", message = message, link = link)
         else: 
             message = args
-            moduleSocial.publishFacebook(message, "", "", "", "me")
+            res = moduleSocial.publishFacebook(message, "", "", "", "me")
             #graph.put_object("me", "feed", message = args)
 
-        return "Ok" 
+        return("Published! Text: %s Url: https://facebook.com/fernando.tricas/posts/%s"% (message ,res[0], res[1]['id'][res[1]['id'].find('_')+1:]))
+        # Names hardcoded
 
     def pln(self, msg, args):
         moduleSocial.publishLinkedin(args, '', '', '')
