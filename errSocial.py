@@ -32,7 +32,8 @@ class ErrPim(BotPlugin):
         """ configuration entries """
         config = {
             'listBlogs': '',
-            'twUser': ''
+            'twUser': '',
+            'fbUser': ''
         }
         return config
 
@@ -92,6 +93,7 @@ class ErrPim(BotPlugin):
             return("Published! Text: %s Url: https://twitter.com/%s/status/%s"% (res['text'], twUser, res['id_str']))
 
     def pfb(self, msg, args):
+        fbUser = self._check_config('fbUser')
         posHttp = args.find('http')
         if posHttp >=0:
             message = args[0:posHttp-1]
@@ -103,7 +105,7 @@ class ErrPim(BotPlugin):
             res = moduleSocial.publishFacebook(message, "", "", "", "me")
             #graph.put_object("me", "feed", message = args)
 
-        return("Published! Text: %s Page: %s Url: https://facebook.com/fernando.tricas/posts/%s"% (message, res[0], res[1]['id'][res[1]['id'].find('_')+1:]))
+        return("Published! Text: %s Page: %s Url: https://facebook.com/%s/posts/%s"% (message, res[0], fbUser, res[1]['id'][res[1]['id'].find('_')+1:]))
         # Names hardcoded
 
     def pln(self, msg, args):
