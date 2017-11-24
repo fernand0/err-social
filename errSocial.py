@@ -13,8 +13,7 @@ import sys
 import json
 import pickle
 from bs4 import BeautifulSoup
-#from cStringIO import StringIO
-import io #import StringIO
+import io
 from twitter import *
 import facebook
 from linkedin import linkedin
@@ -33,6 +32,7 @@ class ErrPim(BotPlugin):
         """ configuration entries """
         config = {
             'listBlogs': '',
+            'twUser': ''
         }
         return config
 
@@ -84,13 +84,12 @@ class ErrPim(BotPlugin):
         return(listLinks[0])
 
     def ptw(self, msg, args):
-        res = moduleSocial.publishTwitter(args, '', '', 'fernand0')
-        # Names hardcoded
+        twUser = self._check_config('twUser')
+        res = moduleSocial.publishTwitter(args, '', '', twUser)
         if type(res) is str:
             return("Something went wrong")
         else:
-            return("Published! Text: %s Url: https://twitter.com/fernand0/status/%s"% (res['text'],res['id_str']))
-        # Names hardcoded
+            return("Published! Text: %s Url: https://twitter.com/%s/status/%s"% (res['text'], twUser, res['id_str']))
 
     def pfb(self, msg, args):
         posHttp = args.find('http')
