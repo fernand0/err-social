@@ -1,19 +1,21 @@
-# This is a skeleton for Err plugins, use this to get started quickly.
+# This is a the ErrSocial code. It is intended to be able to publish in some
+# social networks (currently Twitter, Facebook, LinkedIn) usign the bot.
+#
+# It can also check the links in a list of configured blogs and to publish the
+# links
 
 from errbot import BotPlugin, botcmd
 import configparser
 import subprocess
 import os
+import io
 import time
-#import urllib2
 import urllib.request
 import requests
 import re
 import sys
-import json
 import pickle
 from bs4 import BeautifulSoup
-import io
 from twitter import *
 import facebook
 from linkedin import linkedin
