@@ -115,8 +115,7 @@ class ErrPim(BotPlugin):
         # Names hardcoded
 
     def pln(self, msg, args):
-        moduleSocial.publishLinkedin(args, '', '', '')
-        return "Ok" 
+        return("Published! Url: %s" % moduleSocial.publishLinkedin(args, '', '', '')['updateUrl'])
 
     @botcmd
     def pl(self, msg, args):
