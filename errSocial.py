@@ -2,7 +2,7 @@
 # social networks (currently Twitter, Facebook, LinkedIn) usign the bot.
 #
 # It uses:
-# https://github.com/fernand0/scripts/blob/master/moduleBlog.py
+# https://github.com/fernand0/scripts/blob/master/moduleSocial.py
 # This moduel has its own configuration files.
 # 
 # It can also check the links in a list of configured blogs and to publish the
