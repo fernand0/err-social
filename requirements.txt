@@ -1,2 +1,2 @@
-git+https://github.com/fernand0/scripts/blob/master/moduleSocial.py
-
+./
+https://raw.githubusercontent.com/fernand0/scripts/master/moduleSocial.py
