@@ -25,6 +25,7 @@ import facebook
 from linkedin import linkedin
 import dateparser
 import moduleSocial
+# https://github.com/fernand0/scripts/blob/master/moduleSocial.py
 
 def end(msg=""):
     return("END"+msg)
