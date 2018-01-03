@@ -22,10 +22,17 @@ import pickle
 from bs4 import BeautifulSoup
 from twitter import *
 import facebook
+from fbchat import Client
+from fbchat.models import *
+#https://github.com/carpedm20/fbchat
 from linkedin import linkedin
 import dateparser
 import moduleSocial
 # https://github.com/fernand0/scripts/blob/master/moduleSocial.py
+import keyring
+import keyrings #keyrings.alt
+keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
+# We will store credentials on the keyring
 
 def end(msg=""):
     return("END"+msg)
@@ -137,6 +144,19 @@ class ErrPim(BotPlugin):
 
     def pln(self, msg, args):
         return("Published! Url: %s" % moduleSocial.publishLinkedin(args, '', '', '')['updateUrl'])
+
+    @botcmd
+    def rmfb(self, msg, args):
+        email = args
+        password = keyring.get_password('fb', email)
+
+        client = Client(email, password)
+        threads = client.fetchThreadList()
+        
+        i = 0 # Last message is the first one
+
+        message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
+        yield "Last message is %s " % message[0].text
 
     @botcmd
     def pl(self, msg, args):
