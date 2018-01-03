@@ -98,6 +98,26 @@ class ErrPim(BotPlugin):
         else:
             return("Published! Text: %s Url: https://twitter.com/%s/status/%s"% (res['text'], twUser, res['id_str']))
 
+    def pstw(self, msg, args):
+        twUser = self._check_config('twUser')
+        twExcl = [twUser]
+        if len(args) > 1:
+            search, excl = args[0], args[1]
+            twExcl.append(excl)
+        else:
+            search = args
+        res = moduleSocial.searchTwitter(search, twUser)
+        self.log.debug("Res Twitter %s" % res)
+        yield("There are %d tweets for search %s" % (len(res), search))
+        tuitTxt = ""
+        for tuit in res: 
+            if tuit['user']['screen_name'] not in twExcl: 
+                # All the tweets at once
+                tuitTxt = tuitTxt + 'https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str']+'\n'
+                #yield('https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str'])
+                # Line by line
+        yield tuitTxt+'\n'
+
     def pfb(self, msg, args):
         fbUser = self._check_config('fbUser')
         posHttp = args.find('http')
@@ -143,7 +163,6 @@ class ErrPim(BotPlugin):
                 theList = pickle.dump(theList,f)
             yield theList
 
-
     @botcmd
     def ll(self, msg, args):
         # The idea is to recover the list of links and to check whether the
@@ -159,6 +178,12 @@ class ErrPim(BotPlugin):
             yield "This should not happen. This link has been posted before"
         else:
             yield "I'd post it"
+        yield end()
+
+    @botcmd(split_args_with=None)
+    def stw(self, msg, args):
+        for res in self.pstw(msg, args):
+            yield(res)
         yield end()
 
     @botcmd
