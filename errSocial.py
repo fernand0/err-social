@@ -117,14 +117,17 @@ class ErrPim(BotPlugin):
         res = moduleSocial.searchTwitter(search, twUser)
         self.log.debug("Res Twitter %s" % res)
         yield("There are %d tweets for search %s" % (len(res), search))
-        tuitTxt = ""
+        tuitTxt = "Search:\nhttps://twitter.com/search?q=%s&src=typd\n"%search
+        # This avoids showing big images from tweets
         for tuit in res: 
             if tuit['user']['screen_name'] not in twExcl: 
                 # All the tweets at once
                 tuitTxt = tuitTxt + 'https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str']+'\n'
                 #yield('https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str'])
                 # Line by line
-        yield tuitTxt+'\n'
+        yield tuitTxt.replace('_','\_')
+        yield end()
+        
 
     def pfb(self, msg, args):
         fbUser = self._check_config('fbUser')
@@ -156,7 +159,24 @@ class ErrPim(BotPlugin):
         i = 0 # Last message is the first one
 
         message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
-        yield "Last message is %s " % message[0].text
+        self.log.debug("Message: %s" % message[0])
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        self.log.debug("Form Message: %s" % pp.pprint(message[0].text))
+        self.log.debug("Form Message: %s" % pp.pprint(message[1].text))
+        self.log.debug("Form Message: %s" % pp.pprint(message[2].text))
+
+        #yield "Last message is '%s' " % message[2].text
+        #yield "Last message is '%s' " % message[2].sticker
+        #yield "Last message is '%s' " % client.fetchUserInfo(message[2].author)
+        #yield "Last message is '%s' " % message[1].text
+        #yield "Last message is '%s' " % message[1].sticker
+        #yield "Last message is '%s' " % client.fetchUserInfo(message[1].author)
+        yield "Last message is '%s' " % message[0].text
+        #yield "Last message is '%s' " % message[0].sticker
+        #author = client.fetchUserInfo(message[0].author)
+        #self.log.debug("Form Message: %s" % pp.pprint(author['first_name']+' '+author['last_name']+str(author['affinity'])))
+        #yield "Last author is '%s' " % author['first_name']+' '+author['last_name']+str(author['affinity'])
 
     @botcmd
     def pl(self, msg, args):
