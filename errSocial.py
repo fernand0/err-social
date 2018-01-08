@@ -123,10 +123,7 @@ class ErrPim(BotPlugin):
             if tuit['user']['screen_name'] not in twExcl: 
                 # All the tweets at once
                 tuitTxt = tuitTxt + 'https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str']+'\n'
-                #yield('https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str'])
-                # Line by line
         yield tuitTxt.replace('_','\_')
-        yield end()
         
 
     def pfb(self, msg, args):
