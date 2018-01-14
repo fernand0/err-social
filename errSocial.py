@@ -47,7 +47,8 @@ class ErrPim(BotPlugin):
         config = {
             'listBlogs': '',
             'twUser': '',
-            'fbUser': ''
+            'fbUser': '',
+            'twSearches': '',
         }
         return config
 
@@ -112,8 +113,12 @@ class ErrPim(BotPlugin):
         if len(args) > 1:
             search, excl = args[0], args[1]
             twExcl.append(excl)
-        else:
+        elif len(args) == 1 :
             search = args
+        else:
+            search = self._check_config('twSearches').split(' ')
+            search, excl = search[0], search[1]
+            twExcl.append(excl)
         res = moduleSocial.searchTwitter(search, twUser)
         self.log.debug("Res Twitter %s" % res)
         yield("There are %d tweets for search %s" % (len(res), search))
@@ -155,21 +160,28 @@ class ErrPim(BotPlugin):
         
         i = 0 # Last message is the first one
 
-        message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
-        self.log.debug("Message: %s" % message[0])
+        self.log.debug("Threads: %s", threads)
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
-        self.log.debug("Form Message: %s" % pp.pprint(message[0].text))
-        self.log.debug("Form Message: %s" % pp.pprint(message[1].text))
-        self.log.debug("Form Message: %s" % pp.pprint(message[2].text))
 
+        if len(threads) > 0:
+            message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
+            self.log.debug("Message: %s" % message[0])
+            message = message[0].text
+            self.log.debug("Form Message: %s" % pp.pprint(message[0].text))
+            self.log.debug("Form Message: %s" % pp.pprint(message[1].text))
+            self.log.debug("Form Message: %s" % pp.pprint(message[2].text)) 
+        else: 
+            message = "No messages"
+            self.log.debug("Message: %s" % "empty list")
+        
         #yield "Last message is '%s' " % message[2].text
         #yield "Last message is '%s' " % message[2].sticker
         #yield "Last message is '%s' " % client.fetchUserInfo(message[2].author)
         #yield "Last message is '%s' " % message[1].text
         #yield "Last message is '%s' " % message[1].sticker
         #yield "Last message is '%s' " % client.fetchUserInfo(message[1].author)
-        yield "Last message is '%s' " % message[0].text
+        yield "Last message is '%s' " % message
         #yield "Last message is '%s' " % message[0].sticker
         #author = client.fetchUserInfo(message[0].author)
         #self.log.debug("Form Message: %s" % pp.pprint(author['first_name']+' '+author['last_name']+str(author['affinity'])))
