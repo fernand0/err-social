@@ -101,9 +101,9 @@ class ErrPim(BotPlugin):
 
     def ptw(self, msg, args):
         twUser = self._check_config('twUser')
-        res = moduleSocial.publishTwitter(args, '', '', twUser)
+        res = moduleSocial.publishTwitter(twUser, args, '', '', '', '', '')
         if type(res) is str:
-            return("Something went wrong")
+            return("Something went wrong %s %s %s" % (res, twUser, args))
         else:
             return("Published! Text: %s Url: https://twitter.com/%s/status/%s"% (res['text'], twUser, res['id_str']))
 
@@ -141,14 +141,14 @@ class ErrPim(BotPlugin):
             #graph.put_object("me", "feed", message = message, link = link)
         else: 
             message = args
-            res = moduleSocial.publishFacebook(message, "", "", "", "me")
+            res = moduleSocial.publishFacebook("me", message, "", "", "", "", "")
             #graph.put_object("me", "feed", message = args)
 
         return("Published! Text: %s Page: %s Url: https://facebook.com/%s/posts/%s"% (message, res[0], fbUser, res[1]['id'][res[1]['id'].find('_')+1:]))
         # Names hardcoded
 
     def pln(self, msg, args):
-        return("Published! Url: %s" % moduleSocial.publishLinkedin(args, '', '', '')['updateUrl'])
+        return("Published! Url: %s" % moduleSocial.publishLinkedin('', args, '', '', '', '', '')['updateUrl'])
 
     @botcmd
     def rmfb(self, msg, args):
