@@ -137,7 +137,7 @@ class ErrPim(BotPlugin):
         if posHttp >=0:
             message = args[0:posHttp-1]
             link = args[posHttp:] 
-            res = moduleSocial.publishFacebook(message, link, "", "", "me")
+            res = moduleSocial.publishFacebook("me", message, link, "", "", "", "")
             #graph.put_object("me", "feed", message = message, link = link)
         else: 
             message = args
