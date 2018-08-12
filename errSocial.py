@@ -9,6 +9,7 @@
 # links
 
 from errbot import BotPlugin, botcmd
+from errbot.templating import tenv
 import configparser
 import subprocess
 import os
@@ -19,6 +20,7 @@ import requests
 import re
 import sys
 import pickle
+import logging
 from bs4 import BeautifulSoup
 from twitter import *
 import facebook
@@ -29,6 +31,8 @@ from linkedin import linkedin
 import dateparser
 import moduleSocial
 # https://github.com/fernand0/scripts/blob/master/moduleSocial.py
+import moduleBlog
+# https://github.com/fernand0/scripts/blob/master/moduleBlog.py
 import keyring
 import keyrings #keyrings.alt
 keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
@@ -49,6 +53,7 @@ class ErrPim(BotPlugin):
             'twUser': '',
             'fbUser': '',
             'twSearches': '',
+            'blogCache': ''
         }
         return config
 
@@ -99,6 +104,92 @@ class ErrPim(BotPlugin):
                                 listLinks.append((url+theUrl,theText))
         return(listLinks[0])
 
+    def sendReply(self, mess, args, updates, types):
+        compResponse = ""
+        for tt in types:
+            for socialNetwork in updates.keys():
+                self.log.debug("Updates %s End" % updates[socialNetwork][tt])
+                theUpdates = []
+                for update in updates[socialNetwork][tt]:
+                    theUpdatetxt = update[0].replace('_','\_')
+                    theUpdates.append((theUpdatetxt, update[1], update[2])) 
+                if updates[socialNetwork][tt]: 
+                    if theUpdates[0][0] != 'Empty': 
+                        socialTime = theUpdates[0][2] 
+                    else: 
+                        socialTime = ""
+                else:
+                    socialTime = ""
+                response = tenv().get_template('buffer.md').render({'type': tt,
+                        'nameSocialNetwork': socialNetwork, 
+                        'updates': theUpdates})
+                compResponse = compResponse + response
+
+        return(compResponse)
+
+    def listPostsProgram(self, files, service=""):    
+        outputData = {}
+        i = 0
+        for fileN in files: 
+            print(fileN)
+            firstPos = fileN.find('_')
+            secondPos = fileN.find('_', firstPos+1)
+            logging.info("first %d %d" % (firstPos, secondPos))
+    
+            serviceName = fileN[firstPos+1:secondPos]
+            serviceName = serviceName[0].upper() + serviceName[1:]
+            outputData[serviceName] = {'sent': [], 'pending': []}
+            logging.debug("Service %d %s" % (i,serviceName))
+            logging.info("Service %s" % serviceName)
+            print("filename", fileN)
+            with open(fileN,'rb') as f: 
+                try: 
+                    listP = pickle.load(f) 
+                except: 
+                    listP = [] 
+                print(listP)
+                if len(listP) > 0: 
+                    logging.debug("Waiting in queue: ", fileN) 
+                    for link in listP: 
+                        print("- %s"% link[0])
+                        if link[0]: 
+                            outputData[serviceName]['pending'].append((link[0], link[1], link[3]))
+                        else:
+                            outputData[serviceName]['pending'].append((link[1], link[1], link[3]))
+                else:
+                            outputData[serviceName]['pending'].append(('Empty', 'Empty', 'Empty'))
+            i = i + 1
+        return(outputData)
+
+
+    @botcmd
+    def listC(self, mess, args): 
+        config = configparser.ConfigParser() 
+        config.read([os.path.expanduser('~/.rssBlogs')]) 
+        blog = moduleBlog.moduleBlog() 
+
+        url = config.get('Blog7', "url")
+   
+        blog.setUrl(url)
+        blog.setPostsSlack() 
+        program = config.get('Blog7', "program")
+        files = []
+        for key in config['Blog7'].keys():
+            if key[0] in program:
+                socialNetwork = (key, config.get('Blog7',key))
+                fileNameQ = os.path.expanduser('~/.' 
+                        + urllib.parse.urlparse(url).netloc + '_' 
+                        + socialNetwork[0] + '_' + socialNetwork[1] 
+                        + ".queue")
+                files.append(fileNameQ)
+        if files: 
+            posts = self.listPostsProgram(files, "") 
+
+        response = self.sendReply(mess, args, posts, ['sent','pending'])
+        self.log.debug("Reponse %s End" % response)
+        yield(response)
+        yield end()
+
     def ptw(self, msg, args):
         twUser = self._check_config('twUser')
         res = moduleSocial.publishTwitter(twUser, args, '', '', '', '', '')
@@ -132,20 +223,18 @@ class ErrPim(BotPlugin):
         
 
     def pfb(self, msg, args):
-        fbUser = self._check_config('fbUser')
+        page = self._check_config('fbUser')
         posHttp = args.find('http')
         if posHttp >=0:
             message = args[0:posHttp-1]
             link = args[posHttp:] 
-            res = moduleSocial.publishFacebook("me", message, link, "", "", "", "")
-            #graph.put_object("me", "feed", message = message, link = link)
+            res = moduleSocial.publishFacebook(page, message, link, "", "", "", "")
         else: 
             message = args
-            res = moduleSocial.publishFacebook("me", message, "", "", "", "", "")
-            #graph.put_object("me", "feed", message = args)
+            res = moduleSocial.publishFacebook(page, message, "", "", "", "", "")
 
-        return("Published! Text: %s Page: %s Url: https://facebook.com/%s/posts/%s"% (message, res[0], fbUser, res[1]['id'][res[1]['id'].find('_')+1:]))
-        # Names hardcoded
+        urlFb = 'https://www.facebook.com/permalink.php?story_fbid=%s&id=%s'%(res[1]['id'][res[1]['id'].find('_')+1:],res[0])
+        return("Published! Text: %s Page: %s Url: %s" %(message, page, urlFb))
 
     def pln(self, msg, args):
         return("Published! Url: %s" % moduleSocial.publishLinkedin('', args, '', '', '', '', '')['updateUrl'])
