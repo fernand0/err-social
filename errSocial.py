@@ -24,8 +24,8 @@ import logging
 from bs4 import BeautifulSoup
 from twitter import *
 import facebook
-from fbchat import Client
-from fbchat.models import *
+#from fbchat import Client
+#from fbchat.models import *
 #https://github.com/carpedm20/fbchat
 from linkedin import linkedin
 import dateparser
@@ -165,7 +165,7 @@ class ErrPim(BotPlugin):
     @botcmd
     def listC(self, mess, args): 
         config = configparser.ConfigParser() 
-        config.read([os.path.expanduser('~/.rssBlogs')]) 
+        config.read([os.path.expanduser('~/.mySocial/config/.rssBlogs')]) 
         blog = moduleBlog.moduleBlog() 
 
         url = config.get('Blog7', "url")
@@ -177,7 +177,7 @@ class ErrPim(BotPlugin):
         for key in config['Blog7'].keys():
             if key[0] in program:
                 socialNetwork = (key, config.get('Blog7',key))
-                fileNameQ = os.path.expanduser('~/.' 
+                fileNameQ = os.path.expanduser('~/.mySocial/config/' 
                         + urllib.parse.urlparse(url).netloc + '_' 
                         + socialNetwork[0] + '_' + socialNetwork[1] 
                         + ".queue")
@@ -281,7 +281,7 @@ class ErrPim(BotPlugin):
         # The idea is to recover the list of links and to check whether the
         # link has been posted before or not. At the end we delete one link and
         # add the new one.
-        path = os.path.expanduser('~')
+        path = os.path.expanduser('~/.mySocial/config')
         with open(path + '/.urls.pickle', 'rb') as f:
             theList = pickle.load(f)
         yield "Looking for the link"
@@ -307,7 +307,7 @@ class ErrPim(BotPlugin):
         # The idea is to recover the list of links and to check whether the
         # link has been posted before or not. At the end we delete one link and
         # add the new one.
-        path = os.path.expanduser('~')
+        path = os.path.expanduser('~/.mySocial/config')
         with open(path + '/.urls.pickle', 'rb') as f:
             theList = pickle.load(f)
         yield "Looking for the link"
