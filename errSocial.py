@@ -31,8 +31,6 @@ from linkedin import linkedin
 import dateparser
 import moduleSocial
 # https://github.com/fernand0/scripts/blob/master/moduleSocial.py
-import moduleBlog
-# https://github.com/fernand0/scripts/blob/master/moduleBlog.py
 import keyring
 import keyrings #keyrings.alt
 keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
@@ -80,115 +78,6 @@ class ErrPim(BotPlugin):
             return True
         else:
             return False
-
-    def selectLastLink(self, msg, args):
-        url = self._check_config('listBlogs')
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text)
-        links = soup.find_all('a')
-        listLinks = []
-        for link in links:
-            theUrl = link.get('href')
-            theText = link.text
-            if not self.is_date(theText):
-                # some templates in Wordpress include the link with the date.
-                if not self.is_date(theText[:int(len(theText)/2)]):
-                    # Twice
-                    if theUrl:
-                        if (theUrl.find(url) >= 0 and (theUrl != url)):
-                            if theUrl.count('/') > url.count('/') + 1:
-                                # This is to avoid /about /rss and others...
-                                listLinks.append((theUrl,theText))
-                        if theUrl and ((theUrl[0] == '/') and (theUrl != '/')):
-                            if theUrl.count('/') > 1:
-                                listLinks.append((url+theUrl,theText))
-        return(listLinks[0])
-
-    #def sendReply(self, mess, args, updates, types):
-    #    compResponse = ""
-    #    for tt in types:
-    #        for socialNetwork in updates.keys():
-    #            self.log.debug("Updates %s End" % updates[socialNetwork][tt])
-    #            theUpdates = []
-    #            for update in updates[socialNetwork][tt]:
-    #                theUpdatetxt = update[0].replace('_','\_')
-    #                theUpdates.append((theUpdatetxt, update[1], update[2])) 
-    #            if updates[socialNetwork][tt]: 
-    #                if theUpdates[0][0] != 'Empty': 
-    #                    socialTime = theUpdates[0][2] 
-    #                else: 
-    #                    socialTime = ""
-    #            else:
-    #                socialTime = ""
-    #            response = tenv().get_template('buffer.md').render({'type': tt,
-    #                    'nameSocialNetwork': socialNetwork, 
-    #                    'updates': theUpdates})
-    #            compResponse = compResponse + response
-
-    #    return(compResponse)
-
-    #def listPostsProgram(self, files, service=""):    
-    #    outputData = {}
-    #    i = 0
-    #    for fileN in files: 
-    #        print(fileN)
-    #        firstPos = fileN.find('_')
-    #        secondPos = fileN.find('_', firstPos+1)
-    #        logging.info("first %d %d" % (firstPos, secondPos))
-    #
-    #        serviceName = fileN[firstPos+1:secondPos]
-    #        serviceName = serviceName[0].upper() + serviceName[1:]
-    #        outputData[serviceName] = {'sent': [], 'pending': []}
-    #        logging.debug("Service %d %s" % (i,serviceName))
-    #        logging.info("Service %s" % serviceName)
-    #        print("filename", fileN)
-    #        with open(fileN,'rb') as f: 
-    #            try: 
-    #                listP = pickle.load(f) 
-    #            except: 
-    #                listP = [] 
-    #            print(listP)
-    #            if len(listP) > 0: 
-    #                logging.debug("Waiting in queue: ", fileN) 
-    #                for link in listP: 
-    #                    print("- %s"% link[0])
-    #                    if link[0]: 
-    #                        outputData[serviceName]['pending'].append((link[0], link[1], link[3]))
-    #                    else:
-    #                        outputData[serviceName]['pending'].append((link[1], link[1], link[3]))
-    #            else:
-    #                        outputData[serviceName]['pending'].append(('Empty', 'Empty', 'Empty'))
-    #        i = i + 1
-    #    return(outputData)
-
-
-    #@botcmd
-    #def listC(self, mess, args): 
-    #    config = configparser.ConfigParser() 
-    #    config.read([os.path.expanduser('~/.mySocial/config/.rssBlogs')]) 
-    #    blog = moduleBlog.moduleBlog() 
-
-    #    url = config.get('Blog7', "url")
-   
-    #    blog.setUrl(url)
-    #    blog.setPostsSlack() 
-    #    program = config.get('Blog7', "program")
-    #    files = []
-    #    for key in config['Blog7'].keys():
-    #        if key[0] in program:
-    #            socialNetwork = (key, config.get('Blog7',key))
-    #            fileNameQ = os.path.expanduser('~/.mySocial/config/' 
-    #                    + urllib.parse.urlparse(url).netloc + '_' 
-    #                    + socialNetwork[0] + '_' + socialNetwork[1] 
-    #                    + ".queue")
-    #            files.append(fileNameQ)
-    #    if files: 
-    #        posts = self.listPostsProgram(files, "") 
-
-    #    response = self.sendReply(mess, args, posts, ['sent','pending'])
-    #    self.log.debug("Reponse %s End" % response)
-    #    yield(response)
-    #    yield end()
 
     def ptw(self, msg, args):
         twUser = self._check_config('twUser')
@@ -264,65 +153,16 @@ class ErrPim(BotPlugin):
             message = "No messages"
             self.log.debug("Message: %s" % "empty list")
         
-        #yield "Last message is '%s' " % message[2].text
-        #yield "Last message is '%s' " % message[2].sticker
-        #yield "Last message is '%s' " % client.fetchUserInfo(message[2].author)
-        #yield "Last message is '%s' " % message[1].text
-        #yield "Last message is '%s' " % message[1].sticker
-        #yield "Last message is '%s' " % client.fetchUserInfo(message[1].author)
         yield "Last message is '%s' " % message
-        #yield "Last message is '%s' " % message[0].sticker
-        #author = client.fetchUserInfo(message[0].author)
-        #self.log.debug("Form Message: %s" % pp.pprint(author['first_name']+' '+author['last_name']+str(author['affinity'])))
-        #yield "Last author is '%s' " % author['first_name']+' '+author['last_name']+str(author['affinity'])
-
-    #@botcmd
-    #def pl(self, msg, args):
-    #    # The idea is to recover the list of links and to check whether the
-    #    # link has been posted before or not. At the end we delete one link and
-    #    # add the new one.
-    #    path = os.path.expanduser('~/.mySocial/config')
-    #    with open(path + '/.urls.pickle', 'rb') as f:
-    #        theList = pickle.load(f)
-    #    yield "Looking for the link"
-    #    link = self.selectLastLink(msg, args)
-    #    yield(link)
-    #    if (link[0][link[0].find(':')+2:] in theList):
-    #        yield "This should not happen. This link has been posted before"
-    #    else:
-    #        yield "Twitter..."
-    #        res = self.ptw(msg, link[1]+' '+link[0])
-    #        yield(res)
-    #        yield "Facebook..."
-    #        self.pfb(msg, link[1]+' '+link[0])
-    #        theList = theList[1:]
-    #        theList.append(link[0][link[0].find(':')+2:])
-    #        # We need to avoid http or https
-    #        with open(path+'/.urls.pickle', 'wb') as f:
-    #            theList = pickle.dump(theList,f)
-    #        yield theList
-
-    #@botcmd
-    #def ll(self, msg, args):
-    #    # The idea is to recover the list of links and to check whether the
-    #    # link has been posted before or not. At the end we delete one link and
-    #    # add the new one.
-    #    path = os.path.expanduser('~/.mySocial/config')
-    #    with open(path + '/.urls.pickle', 'rb') as f:
-    #        theList = pickle.load(f)
-    #    yield "Looking for the link"
-    #    link = self.selectLastLink(msg, args)
-    #    yield(link)
-    #    if (link[0][link[0].find(':')+2:] in theList):
-    #        yield "This should not happen. This link has been posted before"
-    #    else:
-    #        yield "I'd post it"
-    #    yield end()
+        yield end()
 
     @botcmd(split_args_with=None)
     def stw(self, msg, args):
-        for res in self.pstw(msg, args):
-            yield(res)
+        if args:
+            for res in self.pstw(msg, args):
+                yield(res)
+        else: 
+            yield("No args")
         yield end()
 
     @botcmd
