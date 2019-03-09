@@ -66,6 +66,21 @@ class ErrPim(BotPlugin):
                 return self.config[option]
             else:
                 return None
+    @botcmd
+    def logW(self, msg, args):
+        n = 40 
+        if args.isdigit(): 
+            n = int(args) 
+            
+        if self.bot_config.BOT_LOG_FILE: 
+            res = ''
+            with open(self.config['log']) as f: 
+                for line in f.readlines()[-n:]:
+                    if (line.find('waiting') >= 0) or (line.find('Finished in') >= 0) :
+                        res = res + line + '\n'
+                return res
+                
+            return 'No log is configured, please define BOT_LOG_FILE in config.py'
 
 
     @botcmd
