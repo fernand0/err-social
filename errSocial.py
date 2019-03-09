@@ -10,7 +10,6 @@
 
 from errbot import BotPlugin, botcmd
 from errbot.templating import tenv
-import configparser
 import subprocess
 import os
 import io
@@ -51,7 +50,8 @@ class ErrPim(BotPlugin):
             'twUser': '',
             'fbUser': '',
             'twSearches': '',
-            'blogCache': ''
+            'blogCache': '',
+            'log': ''
         }
         return config
 
@@ -66,6 +66,21 @@ class ErrPim(BotPlugin):
                 return self.config[option]
             else:
                 return None
+
+
+    @botcmd
+    def logS(self, msg, args):
+        n = 40 
+        if args.isdigit(): 
+            n = int(args) 
+            
+        if self.bot_config.BOT_LOG_FILE: 
+            with open(self.config['log']) as f: 
+                return '```\n' + ''.join(f.readlines()[-n:]) + '\n```' 
+                #return self.config['log']
+                
+            return 'No log is configured, please define BOT_LOG_FILE in config.py'
+
     @botcmd
     def addBlog(self, msg, args):
         self.config['listBlogs'].append(args)
