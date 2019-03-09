@@ -76,7 +76,7 @@ class ErrPim(BotPlugin):
             res = ''
             with open(self.config['log']) as f: 
                 for line in f.readlines()[-n:]:
-                    if (line.find('waiting') >= 0) or (line.find('Finished in') >= 0) :
+                    if (line.find('Waiting') >= 0) or (line.find('Finished in') >= 0) :
                         res = res + line + '\n'
                 return res
                 
