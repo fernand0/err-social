@@ -31,6 +31,7 @@ import dateparser
 import moduleSocial
 # https://github.com/fernand0/scripts/blob/master/moduleSocial.py
 import moduleFacebook
+import moduleLinkedin
 import moduleMastodon
 import moduleTwitter
 import keyring
@@ -124,7 +125,6 @@ class ErrPim(BotPlugin):
         tw = moduleTwitter.moduleTwitter()
         tw.setClient(twUser)
         res = tw.publishPost(args,'','')
-        #res = moduleSocial.publishTwitter(twUser, args, '', '', '', '', '')
         if type(res) is str:
             return("Something went wrong %s %s %s" % (res, twUser, args))
         else:
@@ -174,7 +174,22 @@ class ErrPim(BotPlugin):
         return("Published! Text: %s Page: %s Url: %s" %(message, page, urlFb))
 
     def pln(self, msg, args):
-        return("Published! Url: %s" % moduleSocial.publishLinkedin('', args, '', '', '', '', '')['updateUrl'])
+        posHttp = args.find('http')
+        ln = moduleLinkedin.moduleLinkedin()
+        ln.setClient()
+        
+        if posHttp >=0:
+            message = args[0:posHttp-1]
+            link = args[posHttp:] 
+            res = ln.publishPost(message,link,'')
+        else:
+            message = args
+            res = ln.publishPost(message, "", "")
+        logging.info("Res: %s" % res)
+        if isinstance(res, str): 
+            return("Published! Url: %s" % res)
+        else:
+            return("Published! Url: %s" % res['updateUrl'])
 
     @botcmd
     def rmfb(self, msg, args):
