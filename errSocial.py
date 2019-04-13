@@ -30,6 +30,9 @@ from linkedin import linkedin
 import dateparser
 import moduleSocial
 # https://github.com/fernand0/scripts/blob/master/moduleSocial.py
+import moduleFacebook
+import moduleMastodon
+import moduleTwitter
 import keyring
 import keyrings #keyrings.alt
 keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
@@ -49,6 +52,7 @@ class ErrPim(BotPlugin):
             'listBlogs': '',
             'twUser': '',
             'fbUser': '',
+            'maUser': '',
             'twSearches': '',
             'blogCache': '',
             'log': ''
@@ -109,9 +113,18 @@ class ErrPim(BotPlugin):
         else:
             return False
 
+    def pma(self, msg, args):
+        user = self._check_config('maUser')
+        ma = moduleMastodon.moduleMastodon()
+        ma.setClient(user)
+        ma.publishPost(args,'','')
+
     def ptw(self, msg, args):
         twUser = self._check_config('twUser')
-        res = moduleSocial.publishTwitter(twUser, args, '', '', '', '', '')
+        tw = moduleTwitter.moduleTwitter()
+        tw.setClient(twUser)
+        res = tw.publishPost(args,'','')
+        #res = moduleSocial.publishTwitter(twUser, args, '', '', '', '', '')
         if type(res) is str:
             return("Something went wrong %s %s %s" % (res, twUser, args))
         else:
@@ -144,15 +157,20 @@ class ErrPim(BotPlugin):
     def pfb(self, msg, args):
         page = self._check_config('fbUser')
         posHttp = args.find('http')
+        import moduleFacebook
+        fc = moduleFacebook.moduleFacebook()
+        fc.setClient(page)
+
         if posHttp >=0:
             message = args[0:posHttp-1]
             link = args[posHttp:] 
-            res = moduleSocial.publishFacebook(page, message, link, "", "", "", "")
+            res = fc.publishPost(message, link, "")
         else: 
             message = args
-            res = moduleSocial.publishFacebook(page, message, "", "", "", "", "")
+            res = fc.publishPost(message, "", "")
 
-        urlFb = 'https://www.facebook.com/permalink.php?story_fbid=%s&id=%s'%(res[1]['id'][res[1]['id'].find('_')+1:],res[0])
+        id2, id1 = res['id'].split('_')
+        urlFb = 'https://www.facebook.com/permalink.php?story_fbid=%s&id=%s'%(id1, id2)
         return("Published! Text: %s Page: %s Url: %s" %(message, page, urlFb))
 
     def pln(self, msg, args):
@@ -195,6 +213,11 @@ class ErrPim(BotPlugin):
             yield("No args")
         yield end()
 
+    @botcmd 
+    def ma(self, msg, args):
+        yield self.pma(msg, args)
+        yield end()
+
     @botcmd
     def tw(self, msg, args):
         yield self.ptw(msg, args)
@@ -211,11 +234,13 @@ class ErrPim(BotPlugin):
         yield end()
 
     @botcmd
-    def ptf(self, msg, args):
+    def ptfm(self, msg, args):
         yield "Twitter..."
         yield self.ptw(msg, args)
         yield "Facebook..."
         yield self.pfb(msg, args)
+        yield "Mastodon..."
+        yield self.pma(msg, args)
         yield end()
 
     @botcmd
