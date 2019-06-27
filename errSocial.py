@@ -169,9 +169,7 @@ class ErrPim(BotPlugin):
             message = args
             res = fc.publishPost(message, "", "")
 
-        id2, id1 = res['id'].split('_')
-        urlFb = 'https://www.facebook.com/permalink.php?story_fbid=%s&id=%s'%(id1, id2)
-        return("Published! Text: %s Page: %s Url: %s" %(message, page, urlFb))
+        return("Published! Text: %s Page: %s Url: %s" %(message, page, res))
 
     def pln(self, msg, args):
         posHttp = args.find('http')
@@ -188,6 +186,8 @@ class ErrPim(BotPlugin):
         logging.info("Res: %s" % res)
         if isinstance(res, str): 
             return("Published! Url: %s" % res)
+            # Res: {'updateKey': 'UPDATE-8822-6522789677471186944', 'updateUrl': 'www.linkedin.com/updates?topic=6522789677471186944'}
+            # https://www.linkedin.com/feed/update/urn:li:activity:6522789677471186944/
         else:
             return("Published! Url: %s" % res['updateUrl'])
 
