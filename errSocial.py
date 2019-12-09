@@ -26,7 +26,6 @@ import facebook
 #from fbchat import Client
 #from fbchat.models import *
 #https://github.com/carpedm20/fbchat
-from linkedin import linkedin
 import dateparser
 import moduleSocial
 # https://github.com/fernand0/scripts/blob/master/moduleSocial.py
@@ -43,7 +42,7 @@ def end(msg=""):
     return("END"+msg)
 
 class ErrPim(BotPlugin):
-    """An Err plugin skeleton"""
+    """A PIM (Personal Information Manager) Err plugin """
     min_err_version = '1.6.0' # Optional, but recommended
     max_err_version = '4.3.4' # Optional, but recommended
 
@@ -73,6 +72,8 @@ class ErrPim(BotPlugin):
                 return None
     @botcmd
     def logW(self, msg, args):
+        """ Search in the log the last Finished commands and show them
+        """
         n = 40 
         if args.isdigit(): 
             n = int(args) 
@@ -90,6 +91,8 @@ class ErrPim(BotPlugin):
 
     @botcmd
     def logS(self, msg, args):
+        """ Show the log file defined in the bot configuration
+        """
         n = 40 
         if args.isdigit(): 
             n = int(args) 
@@ -103,6 +106,8 @@ class ErrPim(BotPlugin):
 
     @botcmd
     def addBlog(self, msg, args):
+        """ Add a URL to the 'listBlogs' config parameter
+        """
         self.config['listBlogs'].append(args)
         self.configure(self.config)
         yield(self.config)
@@ -131,7 +136,14 @@ class ErrPim(BotPlugin):
             return("Published! Text: %s Url: https://twitter.com/%s/status/%s"% (res['text'], twUser, res['id_str']))
 
     def pstw(self, msg, args):
+
+        import moduleTwitter
+
+        tw = moduleTwitter.moduleTwitter()
+
         twUser = self._check_config('twUser')
+        tw.setClient(twUser)
+
         twExcl = [twUser]
         if len(args) > 1:
             search, excl = args[0], args[1]
@@ -142,7 +154,8 @@ class ErrPim(BotPlugin):
             search = self._check_config('twSearches').split(' ')
             search, excl = search[0], search[1]
             twExcl.append(excl)
-        res = moduleSocial.searchTwitter(search, twUser)
+        res = tw.search(search)
+        res = res['statuses']
         self.log.debug("Res Twitter %s" % res)
         yield("There are %d tweets for search %s" % (len(res), search))
         tuitTxt = "Search:\nhttps://twitter.com/search?q=%s&src=typd\n"%search
@@ -150,7 +163,7 @@ class ErrPim(BotPlugin):
         for tuit in res: 
             if tuit['user']['screen_name'] not in twExcl: 
                 # All the tweets at once
-                tuitTxt = tuitTxt + 'https://twitter.com/'+tuit['user']['screen_name']+'/status/'+tuit['id_str']+'\n'
+                tuitTxt = tuitTxt + '- @{0} {2} https://twitter.com/{1}/status/{3}\n'.format(tuit['user']['name'], tuit['user']['id'],tuit['text'], tuit['id'])
         yield tuitTxt.replace('_','\_')
         
 
@@ -188,39 +201,44 @@ class ErrPim(BotPlugin):
             return("Published! Url: %s" % res)
             # Res: {'updateKey': 'UPDATE-8822-6522789677471186944', 'updateUrl': 'www.linkedin.com/updates?topic=6522789677471186944'}
             # https://www.linkedin.com/feed/update/urn:li:activity:6522789677471186944/
-        else:
-            return("Published! Url: %s" % res['updateUrl'])
-
-    @botcmd
-    def rmfb(self, msg, args):
-        email = args
-        password = keyring.get_password('fb', email)
-
-        client = Client(email, password)
-        threads = client.fetchThreadList()
-        
-        i = 0 # Last message is the first one
-
-        self.log.debug("Threads: %s", threads)
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-
-        if len(threads) > 0:
-            message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
-            self.log.debug("Message: %s" % message[0])
-            message = message[0].text
-            self.log.debug("Form Message: %s" % pp.pprint(message[0].text))
-            self.log.debug("Form Message: %s" % pp.pprint(message[1].text))
-            self.log.debug("Form Message: %s" % pp.pprint(message[2].text)) 
         else: 
-            message = "No messages"
-            self.log.debug("Message: %s" % "empty list")
-        
-        yield "Last message is '%s' " % message
-        yield end()
+            if 'updateUrl' in res: 
+                return("Published! Url: %s" % res['updateUrl']) 
+            elif 'message' in res: 
+                return("Published! Url: %s" % res['message'])
+
+    #@botcmd
+    #def rmfb(self, msg, args):
+    #    email = args
+    #    password = keyring.get_password('fb', email)
+
+    #    client = Client(email, password)
+    #    threads = client.fetchThreadList()
+    #    
+    #    i = 0 # Last message is the first one
+
+    #    self.log.debug("Threads: %s", threads)
+    #    import pprint
+    #    pp = pprint.PrettyPrinter(indent=4)
+
+    #    if len(threads) > 0:
+    #        message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
+    #        self.log.debug("Message: %s" % message[0])
+    #        message = message[0].text
+    #        self.log.debug("Form Message: %s" % pp.pprint(message[0].text))
+    #        self.log.debug("Form Message: %s" % pp.pprint(message[1].text))
+    #        self.log.debug("Form Message: %s" % pp.pprint(message[2].text)) 
+    #    else: 
+    #        message = "No messages"
+    #        self.log.debug("Message: %s" % "empty list")
+    #    
+    #    yield "Last message is '%s' " % message
+    #    yield end()
 
     @botcmd(split_args_with=None)
     def stw(self, msg, args):
+        """ Search for a string in Twitter
+        """
         if args:
             for res in self.pstw(msg, args):
                 yield(res)
@@ -230,26 +248,36 @@ class ErrPim(BotPlugin):
 
     @botcmd 
     def ma(self, msg, args):
+        """ Publish entry in Mastodon 
+        """
         yield self.pma(msg, args)
         yield end()
 
     @botcmd
     def tw(self, msg, args):
+        """ Publish entry in Twitter
+        """
         yield self.ptw(msg, args)
         yield end()
 
     @botcmd
     def fb(self, msg, args):    
+        """ Publish entry in Facebook
+        """
         yield self.pfb(msg, args)
         yield end()
 
     @botcmd
     def ln(self, msg, args):    
+        """ Publish entry in LinkedIn
+        """
         yield self.pln(msg, args)
         yield end()
 
     @botcmd
     def ptfm(self, msg, args):
+        """ Publish entry in Twitter, Facebook, Mastodon
+        """
         yield "Twitter..."
         yield self.ptw(msg, args)
         yield "Facebook..."
@@ -260,6 +288,8 @@ class ErrPim(BotPlugin):
 
     @botcmd
     def ptfl(self, msg, args):
+        """ Publish entry in Twitter, Facebook, LinkedIn
+        """
         yield "Twitter..."
         yield self.ptw(msg, args)
         yield "Facebook..."
