@@ -156,15 +156,17 @@ class ErrPim(BotPlugin):
             twExcl.append(excl)
         res = tw.search(search)
         res = res['statuses']
+        res.reverse()
         self.log.debug("Res Twitter %s" % res)
-        yield("There are %d tweets for search %s" % (len(res), search))
-        tuitTxt = "Search:\nhttps://twitter.com/search?q=%s&src=typd\n"%search
+        tuitTxt = []
+        tuitTxt.append("There are %d tweets for search %s" % (len(res), search))
+        tuitTxt.append("Search:\nhttps://twitter.com/search?q=%s&src=typd\n"%search)
         # This avoids showing big images from tweets
         for tuit in res: 
             if tuit['user']['screen_name'] not in twExcl: 
                 # All the tweets at once
-                tuitTxt = tuitTxt + '- @{0} {2} https://twitter.com/{1}/status/{3}\n'.format(tuit['user']['name'], tuit['user']['id'],tuit['text'], tuit['id'])
-        yield tuitTxt.replace('_','\_')
+                tuitTxt.append('- @{0} {2} https://twitter.com/{1}/status/{3}'.format(tuit['user']['name'], tuit['user']['id'],tuit['text'], tuit['id']))
+        return(tuitTxt)#.replace('_','\_')
         
 
     def pfb(self, msg, args):
@@ -240,7 +242,9 @@ class ErrPim(BotPlugin):
         """ Search for a string in Twitter
         """
         if args:
-            for res in self.pstw(msg, args):
+            replies = self.pstw(msg, args)
+            self.log.info("Replies %s"%str(replies))
+            for res in replies:
                 yield(res)
         else: 
             yield("No args")
