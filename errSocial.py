@@ -82,8 +82,12 @@ class ErrPim(BotPlugin):
             res = ''
             with open(self.config['log']) as f: 
                 for line in f.readlines()[-n:]:
-                    if (line.find('Waiting') >= 0) or (line.find('Finished in') >= 0) :
-                        res = res + line + '\n'
+                    if (line.find('Waiting') >= 0) or (line.find('Finished') >= 0) :
+                        pos = line.find('     ')
+                        line = line[:pos] + line[pos+5-1:]
+                        maxLen=len('10:03 [moduleSocial] fernand0-errbot (Facebook): Waiting ... 24.88 ')
+                        res = res + line[11:][:maxLen] + '\n'
+                        # Five spaces
                 return res
                 
             return 'No log is configured, please define BOT_LOG_FILE in config.py'
