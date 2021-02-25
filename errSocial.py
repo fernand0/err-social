@@ -2,40 +2,47 @@
 # social networks (currently Twitter, Facebook, LinkedIn) usign the bot.
 #
 # It uses:
-# https://github.com/fernand0/scripts/blob/master/moduleSocial.py
+# https://github.com/fernand0/socialModules/blob/master/moduleSocial.py
 # This moduel has its own configuration files.
 # 
 # It can also check the links in a list of configured blogs and to publish the
 # links
 
-from errbot import BotPlugin, botcmd
-from errbot.templating import tenv
-import subprocess
-import os
+import dateparser
 import io
-import time
+import keyring
+import keyrings #keyrings.alt
+keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
 import urllib.request
+import os
 import requests
 import re
-import sys
 import pickle
+import subprocess
+import time
 import logging
 from bs4 import BeautifulSoup
-from twitter import *
-import facebook
+import sys
+
+
+from errbot import BotPlugin, botcmd
+from errbot.templating import tenv
+
+# Needs to set $PYTHONPATH to the dir where this modules are located
+
+#from twitter import *
+#import facebook
 #from fbchat import Client
 #from fbchat.models import *
 #https://github.com/carpedm20/fbchat
-import dateparser
+# Next modules from:
+# https://github.com/fernand0/socialModules
 import moduleSocial
-# https://github.com/fernand0/scripts/blob/master/moduleSocial.py
 import moduleFacebook
 import moduleLinkedin
 import moduleMastodon
 import moduleTwitter
-import keyring
-import keyrings #keyrings.alt
-keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
+import modulePocket
 # We will store credentials on the keyring
 
 def end(msg=""):
@@ -53,6 +60,7 @@ class ErrPim(BotPlugin):
             'twUser': '',
             'fbUser': '',
             'maUser': '',
+            'poUser': '',
             'twSearches': '',
             'blogCache': '',
             'log': ''
@@ -85,7 +93,7 @@ class ErrPim(BotPlugin):
                     if (line.find('Waiting') >= 0) or (line.find('Finished') >= 0) :
                         pos = line.find('     ')
                         line = line[:pos] + line[pos+5-1:]
-                        maxLen=len('10:03 [moduleSocial] fernand0-errbot (Facebook): Waiting ... 24.88 ')
+                        maxLen=len('11:03 [moduleSocial] fernand0-errbot -> Twitter: Waiting ... 40.89 ')
                         res = res + line[11:][:maxLen] + '\n'
                         # Five spaces
                 return res
@@ -129,15 +137,22 @@ class ErrPim(BotPlugin):
         ma.setClient(user)
         ma.publishPost(args,'','')
 
+    def ppo(self, msg, args):
+        poUser = self._check_config('poUser')
+        po = modulePocket.modulePocket()
+        po.setClient(poUser)
+        res = po.publishPost('', args,'')
+
     def ptw(self, msg, args):
         twUser = self._check_config('twUser')
         tw = moduleTwitter.moduleTwitter()
         tw.setClient(twUser)
         res = tw.publishPost(args,'','')
-        if type(res) is str:
-            return("Something went wrong %s %s %s" % (res, twUser, args))
+        self.log.info("Res: %s" % str(res))
+        if isinstance(res, str):
+            return("Published! Text: {}".format(res))
         else:
-            return("Published! Text: %s Url: https://twitter.com/%s/status/%s"% (res['text'], twUser, res['id_str']))
+            return("Something went wrong %s %s %s" % (res, twUser, args))
 
     def pstw(self, msg, args):
 
@@ -191,18 +206,22 @@ class ErrPim(BotPlugin):
         return("Published! Text: %s Page: %s Url: %s" %(message, page, res))
 
     def pln(self, msg, args):
+        self.log.info("Publishing in LinkedIn")
         posHttp = args.find('http')
-        ln = moduleLinkedin.moduleLinkedin()
-        ln.setClient()
+        client = moduleLinkedin.moduleLinkedin()
+        client.setClient()
+        self.log.info("Publishing in LinkedIn")
         
         if posHttp >=0:
             message = args[0:posHttp-1]
             link = args[posHttp:] 
-            res = ln.publishPost(message,link,'')
+            res = client.publishPost(message,link,'')
         else:
             message = args
-            res = ln.publishPost(message, "", "")
-        logging.info("Res: %s" % res)
+            res = client.publishPost(message, None, "")
+        self.log.info("Res: %s" % res)
+        for re in res:
+            yield(res)
         if isinstance(res, str): 
             return("Published! Url: %s" % res)
             # Res: {'updateKey': 'UPDATE-8822-6522789677471186944', 'updateUrl': 'www.linkedin.com/updates?topic=6522789677471186944'}
@@ -269,6 +288,14 @@ class ErrPim(BotPlugin):
         yield end()
 
     @botcmd
+    def po(self, msg, args):
+        """ Publish entry in Twitter
+        """
+        yield self.ppo(msg, args)
+        yield end()
+
+
+    @botcmd
     def fb(self, msg, args):    
         """ Publish entry in Facebook
         """
@@ -279,7 +306,9 @@ class ErrPim(BotPlugin):
     def ln(self, msg, args):    
         """ Publish entry in LinkedIn
         """
+        self.log.info("1 Publishing in LinkedIn")
         yield self.pln(msg, args)
+        self.log.info("2 Publishing in LinkedIn")
         yield end()
 
     @botcmd
