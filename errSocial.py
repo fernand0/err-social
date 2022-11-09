@@ -10,9 +10,6 @@
 
 import dateparser
 import io
-import keyring
-import keyrings #keyrings.alt
-keyring.set_keyring(keyrings.alt.file.PlaintextKeyring())
 import urllib.request
 import os
 import requests
@@ -37,12 +34,12 @@ from errbot.templating import tenv
 #https://github.com/carpedm20/fbchat
 # Next modules from:
 # https://github.com/fernand0/socialModules
-import moduleSocial
-import moduleFacebook
-import moduleLinkedin
-import moduleMastodon
-import moduleTwitter
-import modulePocket
+import socialModules.moduleSocial
+import socialModules.moduleFacebook
+import socialModules.moduleLinkedin
+import socialModules.moduleMastodon
+import socialModules.moduleTwitter
+import socialModules.modulePocket
 # We will store credentials on the keyring
 
 def end(msg=""):
@@ -133,19 +130,19 @@ class ErrPim(BotPlugin):
 
     def pma(self, msg, args):
         user = self._check_config('maUser')
-        ma = moduleMastodon.moduleMastodon()
+        ma = socialModules.moduleMastodon.moduleMastodon()
         ma.setClient(user)
         ma.publishPost(args,'','')
 
     def ppo(self, msg, args):
         poUser = self._check_config('poUser')
-        po = modulePocket.modulePocket()
+        po = socialModules.modulePocket.modulePocket()
         po.setClient(poUser)
         res = po.publishPost('', args,'')
 
     def ptw(self, msg, args):
         twUser = self._check_config('twUser')
-        tw = moduleTwitter.moduleTwitter()
+        tw = socialModules.moduleTwitter.moduleTwitter()
         tw.setClient(twUser)
         res = tw.publishPost(args,'','')
         self.log.info("Res: %s" % str(res))
@@ -156,9 +153,9 @@ class ErrPim(BotPlugin):
 
     def pstw(self, msg, args):
 
-        import moduleTwitter
+        import socialModules.moduleTwitter
 
-        tw = moduleTwitter.moduleTwitter()
+        tw = socialModules.moduleTwitter.moduleTwitter()
 
         twUser = self._check_config('twUser')
         tw.setClient(twUser)
@@ -191,8 +188,8 @@ class ErrPim(BotPlugin):
     def pfb(self, msg, args):
         page = self._check_config('fbUser')
         posHttp = args.find('http')
-        import moduleFacebook
-        fc = moduleFacebook.moduleFacebook()
+        import socialModules.moduleFacebook
+        fc = socialModules.moduleFacebook.moduleFacebook()
         fc.setClient(page)
 
         if posHttp >=0:
@@ -208,7 +205,7 @@ class ErrPim(BotPlugin):
     def pln(self, msg, args):
         self.log.info("Publishing in LinkedIn")
         posHttp = args.find('http')
-        client = moduleLinkedin.moduleLinkedin()
+        client = socialModules.moduleLinkedin.moduleLinkedin()
         client.setClient()
         self.log.info("Publishing in LinkedIn")
         
@@ -231,34 +228,6 @@ class ErrPim(BotPlugin):
                 return("Published! Url: %s" % res['updateUrl']) 
             elif 'message' in res: 
                 return("Published! Url: %s" % res['message'])
-
-    #@botcmd
-    #def rmfb(self, msg, args):
-    #    email = args
-    #    password = keyring.get_password('fb', email)
-
-    #    client = Client(email, password)
-    #    threads = client.fetchThreadList()
-    #    
-    #    i = 0 # Last message is the first one
-
-    #    self.log.debug("Threads: %s", threads)
-    #    import pprint
-    #    pp = pprint.PrettyPrinter(indent=4)
-
-    #    if len(threads) > 0:
-    #        message = client.fetchThreadMessages(thread_id=threads[i].uid, limit=10)
-    #        self.log.debug("Message: %s" % message[0])
-    #        message = message[0].text
-    #        self.log.debug("Form Message: %s" % pp.pprint(message[0].text))
-    #        self.log.debug("Form Message: %s" % pp.pprint(message[1].text))
-    #        self.log.debug("Form Message: %s" % pp.pprint(message[2].text)) 
-    #    else: 
-    #        message = "No messages"
-    #        self.log.debug("Message: %s" % "empty list")
-    #    
-    #    yield "Last message is '%s' " % message
-    #    yield end()
 
     @botcmd(split_args_with=None)
     def stw(self, msg, args):
