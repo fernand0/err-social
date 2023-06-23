@@ -1,2 +1,2 @@
-social-modules@git+http://git@github.com/fernand0/socialModules@dist
+social-modules@git+https://git@github.com/fernand0/socialModules
 

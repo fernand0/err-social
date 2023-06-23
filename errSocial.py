@@ -34,7 +34,7 @@ from errbot.templating import tenv
 #https://github.com/carpedm20/fbchat
 # Next modules from:
 # https://github.com/fernand0/socialModules
-import socialModules.moduleSocial
+# import socialModules.moduleSocial
 import socialModules.moduleFacebook
 import socialModules.moduleLinkedin
 import socialModules.moduleMastodon
@@ -54,6 +54,7 @@ class ErrPim(BotPlugin):
         """ configuration entries """
         config = {
             'listBlogs': '',
+            'lnUser': '',
             'twUser': '',
             'fbUser': '',
             'maUser': '',
@@ -203,10 +204,11 @@ class ErrPim(BotPlugin):
         return("Published! Text: %s Page: %s Url: %s" %(message, page, res))
 
     def pln(self, msg, args):
+        lnUser = self._check_config('lnUser')
         self.log.info("Publishing in LinkedIn")
         posHttp = args.find('http')
         client = socialModules.moduleLinkedin.moduleLinkedin()
-        client.setClient()
+        client.setClient(lnUser)
         self.log.info("Publishing in LinkedIn")
         
         if posHttp >=0:
