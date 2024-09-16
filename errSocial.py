@@ -35,6 +35,7 @@ from errbot.templating import tenv
 # Next modules from:
 # https://github.com/fernand0/socialModules
 # import socialModules.moduleSocial
+from socialModules.configMod import *
 import socialModules.moduleFacebook
 import socialModules.moduleLinkedin
 import socialModules.moduleMastodon
@@ -185,23 +186,23 @@ class ErrPim(BotPlugin):
                 tuitTxt.append('- @{0} {2} https://twitter.com/{1}/status/{3}'.format(tuit['user']['name'], tuit['user']['id'],tuit['text'], tuit['id']))
         return(tuitTxt)#.replace('_','\_')
         
+    # def pfb(self, msg, args):
+    #     page = self._check_config('fbUser')
+    #     posHttp = args.find('http')
+    #     
+    #     fc = getApi('facebook', page)
+    #     # fc = socialModules.moduleFacebook.moduleFacebook()
+    #     # fc.setClient(page)
 
-    def pfb(self, msg, args):
-        page = self._check_config('fbUser')
-        posHttp = args.find('http')
-        import socialModules.moduleFacebook
-        fc = socialModules.moduleFacebook.moduleFacebook()
-        fc.setClient(page)
+    #     if posHttp >=0:
+    #         message = args[0:posHttp-1]
+    #         link = args[posHttp:] 
+    #         res = fc.publishPost(message, link, "")
+    #     else: 
+    #         message = args
+    #         res = fc.publishPost(message, "", "")
 
-        if posHttp >=0:
-            message = args[0:posHttp-1]
-            link = args[posHttp:] 
-            res = fc.publishPost(message, link, "")
-        else: 
-            message = args
-            res = fc.publishPost(message, "", "")
-
-        return("Published! Text: %s Page: %s Url: %s" %(message, page, res))
+    #     return("Published! Text: %s Page: %s Url: %s" %(message, page, res))
 
     def pln(self, msg, args):
         lnUser = self._check_config('lnUser')
@@ -265,13 +266,12 @@ class ErrPim(BotPlugin):
         yield self.ppo(msg, args)
         yield end()
 
-
-    @botcmd
-    def fb(self, msg, args):    
-        """ Publish entry in Facebook
-        """
-        yield self.pfb(msg, args)
-        yield end()
+    # @botcmd
+    # def fb(self, msg, args):    
+    #     """ Publish entry in Facebook
+    #     """
+    #     yield self.pfb(msg, args)
+    #     yield end()
 
     @botcmd
     def ln(self, msg, args):    
@@ -288,8 +288,8 @@ class ErrPim(BotPlugin):
         """
         yield "Twitter..."
         yield self.ptw(msg, args)
-        yield "Facebook..."
-        yield self.pfb(msg, args)
+        # yield "Facebook..."
+        # yield self.pfb(msg, args)
         yield "Mastodon..."
         yield self.pma(msg, args)
         yield end()
